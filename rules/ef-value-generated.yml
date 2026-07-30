@@ -1,0 +1,5 @@
+id: ef-value-generated
+language: csharp
+rule:
+  pattern: HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity)
+fix: ValueGeneratedOnAdd()

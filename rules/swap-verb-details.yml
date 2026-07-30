@@ -1,0 +1,7 @@
+id: mvc-to-webapi-swap-verb-details
+language: csharp
+rule:
+  pattern: public $TYPE Details($$$ARGS) { $$$BODY }
+fix: |
+  [HttpGet("{id}")]
+  public $TYPE Details($$$ARGS) { $$$BODY }

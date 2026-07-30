@@ -1,0 +1,7 @@
+id: ef-namespaces
+language: csharp
+rule:
+  pattern: using System.Data.Entity.ModelConfiguration;
+fix: |
+  using Microsoft.EntityFrameworkCore;
+  using Microsoft.EntityFrameworkCore.Metadata.Builders;

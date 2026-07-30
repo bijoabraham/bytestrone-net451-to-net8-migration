@@ -1,0 +1,132 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/codemod/codemod/refs/heads/main/schemas/workflow.json
+
+version: "1"
+
+nodes:
+  - id: migrate-mvc-to-web-api
+    name: Migrate MVC to Web API
+    type: automatic
+    steps:
+      - name: "Scaffold API"
+        ast-grep:
+          config_file: rules/scaffold-api.yml
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/*.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+      - name: "Action Result"
+        ast-grep:
+          config_file: rules/action-result.yml
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/*.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+      - name: "Swap Verbs (Index)"
+        ast-grep:
+          config_file: rules/swap-verb-index.yml
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/*.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+      - name: "Swap Verbs (Filter)"
+        ast-grep:
+          config_file: rules/swap-verb-filter.yml
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/*.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+      - name: "Swap Verbs (Details)"
+        ast-grep:
+          config_file: rules/swap-verb-details.yml
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/*.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+      - name: "View Returns"
+        ast-grep:
+          config_file: rules/view-returns.yml
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/*.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+      - name: "EF Namespaces"
+        ast-grep:
+          config_file: rules/ef-namespaces.yml
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/*.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+      - name: "EF Entity Type Configuration"
+        ast-grep:
+          config_file: rules/ef-entity-type.yml
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/*.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+      - name: "EF Builder Prefix"
+        ast-grep:
+          config_file: rules/ef-builder-prefix.yml
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/*.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+      - name: "EF Value Generated"
+        ast-grep:
+          config_file: rules/ef-value-generated.yml
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/*.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+      - name: "MVC Namespaces"
+        ast-grep:
+          config_file: rules/mvc-namespaces.yml
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/*.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+      - name: "Deterministic File Operations (Program.cs & csproj)"
+        run: "node scripts/file-ops.js"

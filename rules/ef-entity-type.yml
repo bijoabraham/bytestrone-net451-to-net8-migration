@@ -1,0 +1,19 @@
+id: ef-entity-type
+language: csharp
+rule:
+  pattern: |
+    public class $CLASS : EntityTypeConfiguration<$ENTITY>
+    {
+        public $CLASS()
+        {
+            $$$BODY
+        }
+    }
+fix: |
+  public class $CLASS : IEntityTypeConfiguration<$ENTITY>
+  {
+      public void Configure(EntityTypeBuilder<$ENTITY> builder)
+      {
+          $$$BODY
+      }
+  }

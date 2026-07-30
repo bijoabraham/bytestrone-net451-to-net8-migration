@@ -1,0 +1,7 @@
+id: mcp-namespaces
+language: csharp
+rule:
+  pattern: using System.Web.Mvc;
+fix: |
+  using Microsoft.AspNetCore.Mvc;
+  using Microsoft.AspNetCore.Mvc.Rendering;

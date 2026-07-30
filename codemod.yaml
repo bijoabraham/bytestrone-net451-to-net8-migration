@@ -1,0 +1,25 @@
+schema_version: "1.0"
+
+name: "bytestrone-net451-to-net8-migration"
+version: "0.2.8"
+description: "Transform legacy code patterns"
+author: "Author <author@example.com>"
+license: "MIT"
+
+
+targets:
+  # Keep this aligned with the files matched in workflow.yaml.
+  languages: ["csharp"]
+
+keywords: ["transformation", "migration"]
+
+registry:
+  access: "public"
+  visibility: "public"
+
+capabilities: []
+
+workflows:
+  - name: main
+    default: true
+    path: workflow.yaml

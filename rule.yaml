@@ -1,0 +1,8 @@
+id: mvc-to-webapi-scaffold-api
+language: c-sharp
+rule:
+  pattern: class $CLASS : Controller { $$$BODY }
+fix: |
+  [ApiController]
+  [Route("api/[controller]")]
+  class $CLASS : ControllerBase { $$$BODY }

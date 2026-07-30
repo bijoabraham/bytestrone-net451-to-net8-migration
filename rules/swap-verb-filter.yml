@@ -1,0 +1,7 @@
+id: mvc-to-webapi-swap-verb-filter
+language: csharp
+rule:
+  pattern: public $TYPE Filter($$$ARGS) { $$$BODY }
+fix: |
+  [HttpGet("filter")]
+  public $TYPE Filter($$$ARGS) { $$$BODY }

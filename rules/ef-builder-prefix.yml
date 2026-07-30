@@ -1,0 +1,15 @@
+id: ef-builder-prefix
+language: csharp
+rule:
+  pattern: $CALL
+  all:
+    - any:
+        - pattern: ToTable($$$A)
+        - pattern: Property($$$A)
+  inside:
+    pattern: |
+      public void Configure(EntityTypeBuilder<$ENTITY> $_)
+      {
+          $$$
+      }
+fix: builder.$CALL

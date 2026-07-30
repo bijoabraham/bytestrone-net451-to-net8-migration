@@ -1,0 +1,7 @@
+id: mvc-to-webapi-swap-verb-index
+language: csharp
+rule:
+  pattern: public $TYPE Index() { $$$BODY }
+fix: |
+  [HttpGet]
+  public $TYPE Index() { $$$BODY }

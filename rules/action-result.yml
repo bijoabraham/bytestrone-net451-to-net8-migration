@@ -1,0 +1,6 @@
+id: mvc-to-webapi-action-result
+language: csharp
+rule:
+  kind: identifier
+  regex: ^(ActionResult|PartialViewResult)$
+fix: IActionResult
