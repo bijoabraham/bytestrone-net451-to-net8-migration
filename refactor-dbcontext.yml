@@ -1,0 +1,5 @@
+id: refactor-dbcontext-instantiation
+language: csharp
+rule:
+  pattern: private CustomerEntitiesDbContext $VAR = new CustomerEntitiesDbContext();
+fix: private readonly CustomerEntitiesDbContext $VAR;

@@ -1,9 +1,9 @@
 schema_version: "1.0"
 
 name: "bytestrone-net451-to-net8-migration"
-version: "0.2.8"
-description: "Transform legacy code patterns"
-author: "Author <author@example.com>"
+version: "0.1.6"
+description: "Transform legacy code net 4.5.1 MVC project to net 8 patterns"
+author: "bijo abraham"
 license: "MIT"
 
 

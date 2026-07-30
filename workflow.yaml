@@ -3,13 +3,13 @@
 version: "1"
 
 nodes:
-  - id: migrate-mvc-to-web-api
-    name: Migrate MVC to Web API
+  - id: apply-namespaces
+    name: Update MVC Namespaces
     type: automatic
     steps:
-      - name: "Scaffold API"
-        ast-grep:
-          config_file: rules/scaffold-api.yml
+      - name: "Scan matching csharp files and apply namespace fixes"
+        js-ast-grep:
+          js_file: scripts/codemod-namespaces.ts
           base_path: "."
           language: "csharp"
           include:
@@ -18,9 +18,14 @@ nodes:
             - "**/node_modules/**"
             - "**/dist/**"
             - "**/build/**"
-      - name: "Action Result"
-        ast-grep:
-          config_file: rules/action-result.yml
+
+  - id: apply-dbcontext
+    name: Refactor DbContext for DI
+    type: automatic
+    steps:
+      - name: "Scan matching csharp files and apply DbContext fixes"
+        js-ast-grep:
+          js_file: scripts/codemod-dbcontext.ts
           base_path: "."
           language: "csharp"
           include:
@@ -29,9 +34,64 @@ nodes:
             - "**/node_modules/**"
             - "**/dist/**"
             - "**/build/**"
-      - name: "Swap Verbs (Index)"
-        ast-grep:
-          config_file: rules/swap-verb-index.yml
+
+  - id: apply-razor
+    name: Modernize Razor Form Tags
+    type: automatic
+    steps:
+      - name: "Scan matching html files and apply Razor fixes"
+        js-ast-grep:
+          js_file: scripts/codemod-razor.ts
+          base_path: "."
+          language: "html"
+          include:
+            - "**/*.cshtml"
+            - "**/*.html"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+
+  - id: apply-program-cs
+    name: Inject Program.cs and Remove Global.asax
+    type: automatic
+    steps:
+      - name: "Scan Global.asax.cs to wipe legacy config and inject .NET 8 Program.cs"
+        js-ast-grep:
+          js_file: scripts/codemod-program-cs.ts
+          base_path: "."
+          language: "csharp"
+          include:
+            - "**/Global.asax.cs"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+
+  - id: apply-infrastructure
+    name: Migrate Infrastructure Files (.csproj, appsettings.json)
+    type: automatic
+    steps:
+      - name: "Rewrite .csproj, extract connection string to appsettings.json, delete legacy config"
+        js-ast-grep:
+          js_file: scripts/codemod-infrastructure.ts
+          base_path: "."
+          language: "html"
+          include:
+            - "**/Web.config"
+            - "**/*.csproj"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+
+  - id: apply-efcore
+    name: Modernize Entity Framework 6 to EF Core 8
+    type: automatic
+    steps:
+      - name: "Scan matching csharp files and replace EF6 syntax with EF Core 8"
+        js-ast-grep:
+          js_file: scripts/codemod-efcore.ts
           base_path: "."
           language: "csharp"
           include:
@@ -40,93 +100,3 @@ nodes:
             - "**/node_modules/**"
             - "**/dist/**"
             - "**/build/**"
-      - name: "Swap Verbs (Filter)"
-        ast-grep:
-          config_file: rules/swap-verb-filter.yml
-          base_path: "."
-          language: "csharp"
-          include:
-            - "**/*.cs"
-          exclude:
-            - "**/node_modules/**"
-            - "**/dist/**"
-            - "**/build/**"
-      - name: "Swap Verbs (Details)"
-        ast-grep:
-          config_file: rules/swap-verb-details.yml
-          base_path: "."
-          language: "csharp"
-          include:
-            - "**/*.cs"
-          exclude:
-            - "**/node_modules/**"
-            - "**/dist/**"
-            - "**/build/**"
-      - name: "View Returns"
-        ast-grep:
-          config_file: rules/view-returns.yml
-          base_path: "."
-          language: "csharp"
-          include:
-            - "**/*.cs"
-          exclude:
-            - "**/node_modules/**"
-            - "**/dist/**"
-            - "**/build/**"
-      - name: "EF Namespaces"
-        ast-grep:
-          config_file: rules/ef-namespaces.yml
-          base_path: "."
-          language: "csharp"
-          include:
-            - "**/*.cs"
-          exclude:
-            - "**/node_modules/**"
-            - "**/dist/**"
-            - "**/build/**"
-      - name: "EF Entity Type Configuration"
-        ast-grep:
-          config_file: rules/ef-entity-type.yml
-          base_path: "."
-          language: "csharp"
-          include:
-            - "**/*.cs"
-          exclude:
-            - "**/node_modules/**"
-            - "**/dist/**"
-            - "**/build/**"
-      - name: "EF Builder Prefix"
-        ast-grep:
-          config_file: rules/ef-builder-prefix.yml
-          base_path: "."
-          language: "csharp"
-          include:
-            - "**/*.cs"
-          exclude:
-            - "**/node_modules/**"
-            - "**/dist/**"
-            - "**/build/**"
-      - name: "EF Value Generated"
-        ast-grep:
-          config_file: rules/ef-value-generated.yml
-          base_path: "."
-          language: "csharp"
-          include:
-            - "**/*.cs"
-          exclude:
-            - "**/node_modules/**"
-            - "**/dist/**"
-            - "**/build/**"
-      - name: "MVC Namespaces"
-        ast-grep:
-          config_file: rules/mvc-namespaces.yml
-          base_path: "."
-          language: "csharp"
-          include:
-            - "**/*.cs"
-          exclude:
-            - "**/node_modules/**"
-            - "**/dist/**"
-            - "**/build/**"
-      - name: "Deterministic File Operations (Program.cs & csproj)"
-        run: "node scripts/file-ops.js"

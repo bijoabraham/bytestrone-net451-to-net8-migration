@@ -1,6 +1,6 @@
 {
   "name": "bytestrone-net451-to-net8-migration",
-  "version": "0.2.3",
+  "version": "0.1.6",
   "description": "Transform legacy code patterns",
   "packageManager": "npm@10.x",
   "type": "module",

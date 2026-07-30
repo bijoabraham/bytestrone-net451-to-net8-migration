@@ -1,0 +1,5 @@
+id: update-mvc-namespace
+language: csharp
+rule:
+  pattern: using System.Web.Mvc;
+fix: using Microsoft.AspNetCore.Mvc;

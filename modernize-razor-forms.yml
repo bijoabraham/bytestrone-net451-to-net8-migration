@@ -1,0 +1,5 @@
+id: modernize-razor-forms
+language: html
+rule:
+  pattern: '@using (Html.BeginForm($ACTION, $CONTROLLER)) { $$$BODY }'
+fix: '<form asp-action="$ACTION" asp-controller="$CONTROLLER" method="post"> $$$BODY </form>'

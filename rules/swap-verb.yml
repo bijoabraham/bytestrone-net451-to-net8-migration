@@ -1,7 +1,0 @@
-id: mvc-to-webapi-swap-verb
-language: csharp
-rule:
-  pattern: public ActionResult $METHOD($$$ARGS) { $$$BODY }
-fix: |
-  [HttpGet]
-  public IActionResult $METHOD($$$ARGS) { $$$BODY }
