@@ -4,6 +4,19 @@ import type Html from "codemod:ast-grep/langs/html";
 const codemod: Codemod<Html> = async (root) => {
   const rootNode = root.root();
   
+  // Custom NopCommerce HTML Helpers
+  const nopLabels = rootNode.findAll({ rule: { pattern: "@Html.NopLabelFor($MODEL)" } });
+  const nopLabelEdits = nopLabels.map(node => {
+    const model = node.getMatch("MODEL")?.text().replace("m => m.", "").replace("model => model.", "") || "";
+    return node.replace(`<label asp-for="${model}"></label>`);
+  });
+  
+  const nopEditors = rootNode.findAll({ rule: { pattern: "@Html.NopEditorFor($MODEL)" } });
+  const nopEditorEdits = nopEditors.map(node => {
+    const model = node.getMatch("MODEL")?.text().replace("m => m.", "").replace("model => model.", "") || "";
+    return node.replace(`<input asp-for="${model}" class="form-control" />`);
+  });
+  
   // Use the 'any' rule to match multiple overloads of Html.BeginForm
   const nodes = rootNode.findAll({ 
     rule: { 
@@ -17,7 +30,7 @@ const codemod: Codemod<Html> = async (root) => {
     } 
   });
   
-  const edits = nodes.map(node => {
+  const formEdits = nodes.map(node => {
     const actionMatch = node.getMatch("ACTION");
     const controllerMatch = node.getMatch("CONTROLLER");
     
@@ -31,6 +44,8 @@ const codemod: Codemod<Html> = async (root) => {
     
     return node.replace(`<form${action}${controller} method="${methodStr}">\n${body}\n</form>`);
   });
+  
+  const edits = [...formEdits, ...nopLabelEdits, ...nopEditorEdits];
   
   return rootNode.commitEdits(edits);
 }
