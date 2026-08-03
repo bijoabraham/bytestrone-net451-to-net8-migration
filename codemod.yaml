@@ -1,7 +1,7 @@
 schema_version: "1.0"
 
 name: "bytestrone-net451-to-net8-migration"
-version: "0.2.0"
+version: "0.2.1"
 description: "Transform legacy code net 4.5.1 MVC project to net 8 patterns"
 author: "bijo abraham"
 license: "MIT"
