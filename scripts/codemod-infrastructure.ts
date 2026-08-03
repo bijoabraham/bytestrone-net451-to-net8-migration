@@ -1,31 +1,33 @@
 import type { Codemod } from "codemod:ast-grep";
-import type Html from "codemod:ast-grep/langs/html";
+import type JavaScript from "codemod:ast-grep/langs/javascript";
 
-const codemod: Codemod<Html> = async (root, context) => {
+const codemod: Codemod<JavaScript> = async (root, context) => {
   const rootNode = root.root();
   const filePath = context?.filePath || "";
+  let text = rootNode.text();
 
-  // Because Codemod Cloud restricts 'fs' operations (OS Error 123 in sandbox),
-  // we must strictly use AST string replacements on the matched files!
-  
   if (filePath.endsWith(".csproj")) {
-    const newCsproj = `<Project Sdk="Microsoft.NET.Sdk.Web">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
-  </ItemGroup>
-</Project>`;
-    return rootNode.commitEdits([rootNode.replace(newCsproj)]);
-  }
-  
-  if (filePath.endsWith("Web.config")) {
-    // We cannot create appsettings.json or rename Web.config in the sandbox, 
-    // so we will just wipe Web.config to prevent legacy conflicts.
-    return rootNode.commitEdits([rootNode.replace(`<!-- TODO: Migration requires manual appsettings.json creation -->`)]);
+    // Only process legacy csproj files
+    if (text.includes('ToolsVersion="12.0"')) {
+      // Determine SDK type based on filename
+      const isWeb = filePath.endsWith("Nop.Web.csproj") || filePath.endsWith("Nop.Admin.csproj");
+      const sdkType = isWeb ? "Microsoft.NET.Sdk.Web" : "Microsoft.NET.Sdk";
+
+      // Extract ProjectReferences using a global regex match
+      const projRefRegex = /<ProjectReference\s+Include="([^"]+)">/g;
+      const projRefs: string[] = [];
+      let match;
+      while ((match = projRefRegex.exec(text)) !== null) {
+        projRefs.push(`    <ProjectReference Include="${match[1]}" />`);
+      }
+
+      // Build the new modern csproj content
+      const itemGroup = projRefs.length > 0 ? `\n  <ItemGroup>\n${projRefs.join("\n")}\n  </ItemGroup>\n` : "";
+      
+      const newCsproj = `<Project Sdk="${sdkType}">\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n  </PropertyGroup>\n${itemGroup}</Project>`;
+      
+      return rootNode.commitEdits([rootNode.replace(newCsproj)]);
+    }
   }
 
   return rootNode.commitEdits([]);

@@ -5,27 +5,45 @@ const codemod: Codemod<CSharp> = async (root) => {
   const rootNode = root.root();
   let text = rootNode.text();
   
-  // 1. Swap Namespaces
-  text = text.replace(/using System\.Data\.Entity;/g, "using Microsoft.EntityFrameworkCore;");
-  text = text.replace(/using System\.Data\.Entity\.ModelConfiguration;/g, "using Microsoft.EntityFrameworkCore;\nusing Microsoft.EntityFrameworkCore.Metadata.Builders;");
-  
-  // 2. Refactor DbContext and Builder Syntax
-  text = text.replace(/DbModelBuilder/g, "ModelBuilder");
-  text = text.replace(/base\.SaveChanges\(\);/g, "this.SaveChanges();");
-  
-  // 3. Refactor Entity Configurations (Fluent API)
-  text = text.replace(/EntityTypeConfiguration</g, "IEntityTypeConfiguration<");
-  text = text.replace(/public CustomerConfiguration\(\)/g, "public void Configure(EntityTypeBuilder<Customer> builder)");
-  text = text.replace(/ToTable\(/g, "builder.ToTable(");
-  text = text.replace(/Property\(/g, "builder.Property(");
-  text = text.replace(/HasDatabaseGeneratedOption\(DatabaseGeneratedOption\.Identity\)/g, "ValueGeneratedOnAdd()");
-  
-  // 4. Clean up Legacy Database Initializers (DropCreateDatabaseAlways is obsolete)
-  text = text.replace(/public class CustomerDatabaseInitializer : DropCreateDatabaseAlways<CustomerEntitiesDbContext>/g, "public class CustomerDatabaseInitializer");
-  text = text.replace(/protected override void Seed\(CustomerEntitiesDbContext context\)/g, "public void Seed(CustomerEntitiesDbContext context)");
-  text = text.replace(/base\.Seed\(context\);/g, "");
+  // NopCommerce mappings already have 'using System.Data.Entity;' swapped by the namespace codemod,
+  // but we'll add the builders namespace if it's missing (usually handled by namespace codemod, but let's ensure it).
+  if (text.includes("IEntityTypeConfiguration<") && !text.includes("using Microsoft.EntityFrameworkCore.Metadata.Builders;")) {
+      text = "using Microsoft.EntityFrameworkCore.Metadata.Builders;\n" + text;
+  }
+  if (text.includes("IEntityTypeConfiguration<") && !text.includes("using Microsoft.EntityFrameworkCore;")) {
+      text = "using Microsoft.EntityFrameworkCore;\n" + text;
+  }
 
-  // If text was modified, apply the replacement to the AST Root
+  // 1. Fix the base class that was broken by the previous run, or if it's pristine
+  text = text.replace(/NopI+EntityTypeConfiguration</g, "IEntityTypeConfiguration<");
+  text = text.replace(/NopEntityTypeConfiguration</g, "IEntityTypeConfiguration<");
+
+  // 2. Refactor Entity Configurations (Fluent API)
+  // Find the constructor e.g., public AffiliateMap()
+  text = text.replace(/public partial class ([A-Za-z0-9_]+) : IEntityTypeConfiguration<([A-Za-z0-9_]+)>\s*\{\s*public \1\(\)\s*\{/g, "public partial class $1 : IEntityTypeConfiguration<$2>\n    {\n        public void Configure(EntityTypeBuilder<$2> builder)\n        {");
+  
+  // 3. Fix fluent API calls
+  // Clean up 'this.builder.' if it was broken by previous run
+  text = text.replace(/this\.builder\.builder\./g, "builder.");
+  text = text.replace(/this\.builder\./g, "builder.");
+  
+  // Standard replacements
+  text = text.replace(/this\.ToTable\(/g, "builder.ToTable(");
+  text = text.replace(/this\.HasKey\(/g, "builder.HasKey(");
+  text = text.replace(/this\.Property\(/g, "builder.Property(");
+  text = text.replace(/this\.Ignore\(/g, "builder.Ignore(");
+  
+  // Relationships
+  text = text.replace(/this\.HasRequired\(/g, "builder.HasOne(");
+  text = text.replace(/this\.HasOptional\(/g, "builder.HasOne(");
+  text = text.replace(/this\.HasMany\(/g, "builder.HasMany(");
+  
+  // Cascade Delete
+  text = text.replace(/\.WillCascadeOnDelete\(false\)/g, ".OnDelete(DeleteBehavior.Restrict)");
+  text = text.replace(/\.WillCascadeOnDelete\(true\)/g, ".OnDelete(DeleteBehavior.Cascade)");
+  text = text.replace(/\.WillCascadeOnDelete\(\)/g, ".OnDelete(DeleteBehavior.Cascade)");
+
+  // If text was modified, apply the replacement
   if (text !== rootNode.text()) {
     return rootNode.commitEdits([rootNode.replace(text)]);
   }

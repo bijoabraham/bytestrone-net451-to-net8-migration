@@ -1,33 +1,17 @@
-// Console.WriteLine() will be matched by pattern!
-// click diff tab to see rewrite.
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Nop.Core.Domain.Affiliates;
 
-using System;
-
-namespace MyApp
+namespace Nop.Data.Mapping.Affiliates
 {
-    public class Program
+    public partial class AffiliateMap : IEntityTypeConfiguration<Affiliate>
     {
-        public static void Main(string[] args)
+        public void Configure(EntityTypeBuilder<Affiliate> builder)
         {
-            Logger.Log("Hello, World!");
-            Logger.Log("Debug message: ");
-            Logger.Log($"User ID: {userId}");
-            
-            if (isDebugMode)
-            {
-                Logger.Log("Application started successfully");
-                Logger.Log("Processing...");
-            }
-            
-            // This won't be matched
-            var message = "Console.WriteLine(\"not me\")";
-            SomeOtherClass.WriteLine("also not matched");
-        }
-        
-        private static void ProcessData()
-        {
-            Logger.Log("Processing data");
-            Logger.Log("Progress: 50%");
+            builder.ToTable("Affiliate");
+            builder.HasKey(a => a.Id);
+
+            builder.HasOne(a => a.Address).WithMany().HasForeignKey(x => x.AddressId).OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

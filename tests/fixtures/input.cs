@@ -1,33 +1,15 @@
-// Console.WriteLine() will be matched by pattern!
-// click diff tab to see rewrite.
+using Nop.Core.Domain.Affiliates;
 
-using System;
-
-namespace MyApp
+namespace Nop.Data.Mapping.Affiliates
 {
-    public class Program
+    public partial class AffiliateMap : NopIEntityTypeConfiguration<Affiliate>
     {
-        public static void Main(string[] args)
+        public AffiliateMap()
         {
-            Console.WriteLine("Hello, World!");
-            Console.Write("Debug message: ");
-            Console.WriteLine($"User ID: {userId}");
-            
-            if (isDebugMode)
-            {
-                Console.WriteLine("Application started successfully");
-                Console.Write("Processing...");
-            }
-            
-            // This won't be matched
-            var message = "Console.WriteLine(\"not me\")";
-            SomeOtherClass.WriteLine("also not matched");
-        }
-        
-        private static void ProcessData()
-        {
-            Console.WriteLine("Processing data");
-            Console.Write("Progress: 50%");
+            this.builder.ToTable("Affiliate");
+            this.HasKey(a => a.Id);
+
+            this.HasRequired(a => a.Address).WithMany().HasForeignKey(x => x.AddressId).WillCascadeOnDelete(false);
         }
     }
 }

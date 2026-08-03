@@ -3,23 +3,23 @@ import type CSharp from "codemod:ast-grep/langs/c_sharp";
 
 const codemod: Codemod<CSharp> = async (root) => {
   const rootNode = root.root();
+  let text = rootNode.text();
   
-  // Legacy DbContext
-  const nodes = rootNode.findAll({ rule: { pattern: "private CustomerEntitiesDbContext $VAR = new CustomerEntitiesDbContext();" } });
-  const edits = nodes.map(node => {
-    const varName = node.getMatch("VAR")?.text();
-    return node.replace(`private readonly CustomerEntitiesDbContext ${varName};`);
-  });
+  // 1. Rename DbModelBuilder to ModelBuilder
+  text = text.replace(/DbModelBuilder/g, "ModelBuilder");
   
-  // Autofac to Microsoft DI
-  const autofacNodes = rootNode.findAll({ rule: { pattern: "builder.RegisterType<$T>().As<$I>().InstancePerLifetimeScope();" } });
-  const autofacEdits = autofacNodes.map(node => {
-    const tMatch = node.getMatch("T")?.text() || "";
-    const iMatch = node.getMatch("I")?.text() || "";
-    return node.replace(`services.AddScoped<${iMatch}, ${tMatch}>();`);
-  });
+  // 2. Remove IObjectContextAdapter casts
+  // Example: ((IObjectContextAdapter)this).ObjectContext -> this
+  text = text.replace(/\(\(IObjectContextAdapter\)([a-zA-Z0-9_]+)\)\.ObjectContext/g, "$1");
   
-  return rootNode.commitEdits([...edits, ...autofacEdits]);
+  // 3. Simple Autofac to Microsoft DI conversions
+  text = text.replace(/builder\.RegisterType<([a-zA-Z0-9_]+)>\(\)\.As<([a-zA-Z0-9_]+)>\(\)\.InstancePerLifetimeScope\(\);/g, "services.AddScoped<$2, $1>();");
+  
+  if (text !== rootNode.text()) {
+    return rootNode.commitEdits([rootNode.replace(text)]);
+  }
+  
+  return rootNode.commitEdits([]);
 }
 export default codemod;
 
