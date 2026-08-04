@@ -1,39 +1,21 @@
-# my-codemod
+# Bytestrone .NET 4.5.1 to .NET 8 Migration
 
-Transform legacy code patterns
+## Overview
+A comprehensive workflow codemod designed to automate the heavy lifting of modernizing a monolithic `.NET Framework 4.5.1` application to **.NET 8 (ASP.NET Core)** and **EF Core 8**.
 
-## Installation
+## How It Works
+This workflow orchestrates multiple targeted AST (Abstract Syntax Tree) transformations across the entire repository:
+1. **Update MVC Namespaces:** Replaces `System.Web.Mvc` with `Microsoft.AspNetCore.Mvc` globally.
+2. **Refactor DbContext:** Updates Entity Framework contexts for modern Dependency Injection injection patterns.
+3. **Modernize Razor Form Tags:** Converts legacy HTML Helpers (`@Html.BeginForm`) to ASP.NET Core Tag Helpers.
+4. **Program.cs Injection:** Safely deletes `Global.asax` and injects a modern, minimal `Program.cs` Kestrel bootstrapper.
+5. **Infrastructure Migration:** Extracts connection strings to `appsettings.json` and drastically simplifies legacy XML `.csproj` files into minimal SDK-style projects (`<Project Sdk="Microsoft.NET.Sdk">`).
+6. **EF Core Modernization:** Swaps EF6 syntax for EF Core 8 equivalents.
 
-```bash
-# Install from registry
-codemod run my-codemod
-
-# Or run locally
-codemod run -w workflow.yaml
-```
+## Limitations
+* While this automates repetitive syntax, deep architectural mismatches (such as custom routing constraints, low-level caching like `MemoryCache`, or `HttpContext` fakes) will still require manual compilation fixes post-migration.
 
 ## Usage
-
-Document the exact migration this codemod performs before publishing. At minimum, cover:
-
-- The concrete syntax or API patterns it rewrites
-- The file types or paths it targets
-- Important preserve/no-op cases and exclusions
-
-## Development
-
 ```bash
-# Test the transformation
-npm test
-
-# Validate the workflow
-codemod workflow validate -w workflow.yaml
-
-# Publish to registry
-codemod login
-codemod publish
+npx codemod run bytestrone-net451-to-net8-migration
 ```
-
-## License
-
-MIT
